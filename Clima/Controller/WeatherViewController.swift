@@ -27,6 +27,9 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         
         // request for authorization from user
         locationManager.requestWhenInUseAuthorization()
+        
+        // method working in the background
+        locationManager.startUpdatingLocation()
     }
     
     
@@ -67,12 +70,38 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     /***************************************************************/
     
     
-    //Write the didUpdateLocations method here:
+    // Write the didUpdateLocations method here:
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+        // the last value of the array is the most accurate
+        let location = locations[locations.count - 1]
+        
+        // check if the location is valid
+        if location.horizontalAccuracy > 0 {
+            locationManager.stopUpdatingLocation()
+            
+            print("longitude = \(location.coordinate.longitude), latitude = \(location.coordinate.latitude)")
+            
+            let latitude = location.coordinate.latitude
+            let longitude = location.coordinate.longitude
+            
+            let params = [String : String]                 // dictionary for coordinate
+            
+        }
+        
+        
+    }
     
     
-    
-    //Write the didFailWithError method here:
-    
+    /* Write the didFailWithError method here:
+       Get triggered when there's error
+    */
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+        
+        // display for user
+        cityLabel.text = "Location Unavailable"
+    }
     
     
 
