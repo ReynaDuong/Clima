@@ -1,5 +1,7 @@
 import UIKit
 import CoreLocation
+import Alamofire
+import SwiftyJSON
 
 class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     
@@ -19,13 +21,11 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //TODO:Set up the location manager here
-        locationManager.delegate = self         // this class deals with location data
+        // this controller deals with location data
+        locationManager.delegate = self
         
-        // accuracy = meters
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         
-        // request for authorization from user
         locationManager.requestWhenInUseAuthorization()
         
         // method working in the background
@@ -37,7 +37,20 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     //MARK: - Networking
     /***************************************************************/
     
-    //Write the getWeatherData method here:
+    func getWeatherData(url: String, parameters: [String : String]) {
+        
+        Alamofire.request(url, method: .get, parameters: parameters).responseJSON {
+            response in
+            if response.result.isSuccess{
+                // data came back
+                
+            }
+            else {
+                print("Error \(String(describing: response.result.error))")
+                self.cityLabel.text = "Connection Issues"
+            }
+        }
+    }
     
 
     
@@ -69,8 +82,6 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     //MARK: - Location Manager Delegate Methods
     /***************************************************************/
     
-    
-    // Write the didUpdateLocations method here:
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         
         // the last value of the array is the most accurate
@@ -82,10 +93,15 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
             
             print("longitude = \(location.coordinate.longitude), latitude = \(location.coordinate.latitude)")
             
-            let latitude = location.coordinate.latitude
-            let longitude = location.coordinate.longitude
+            let latitude = String(location.coordinate.latitude)
+            let longitude = String(location.coordinate.longitude)
             
-            let params = [String : String]                 // dictionary for coordinate
+            // dictionary for coordinate
+            let params : [String : String] = ["lat" : latitude, "lon" : longitude, "appid" : APP_ID]
+            
+            getWeatherData(url: WEATHER_URL, parameters: params)
+            
+            
             
         }
         
@@ -93,9 +109,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     
-    /* Write the didFailWithError method here:
-       Get triggered when there's error
-    */
+    
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error)
         
